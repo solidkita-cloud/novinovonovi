@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  --color-bubblegum-pink: #FF4FA3;
+  --color-electric-yellow: #FFDA35;
+  --color-acid-lime: #B7F45A;
+  --color-pop-violet: #8C65FF;
+  --color-deep-violet: #5B21B6;
+  --color-soft-lavender: #F3E8FF;
+  --color-cream: #FFF4E8;
+  --color-chrome-silver: #C9C9D2;
+  --color-retro-dark: #1E1233;
+
+  --shadow-retro: 4px 4px 0px #1E1233;
+  --shadow-retro-lg: 6px 6px 0px #1E1233;
+  --shadow-retro-yellow: 5px 5px 0px #FFDA35;
+  --shadow-retro-pink: 5px 5px 0px #FF4FA3;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-retro-dark);
+  font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  user-select: auto;
+}
+
+/* Y2K Window & Card styles */
+.retro-window {
+  background: #ffffff;
+  border: 3px solid #1E1233;
+  box-shadow: 6px 6px 0px #1E1233;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.retro-window-header {
+  background: linear-gradient(90deg, #8C65FF 0%, #FF4FA3 100%);
+  color: #ffffff;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid #1E1233;
+  font-family: var(--font-mono), monospace;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.retro-btn-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  border: 2px solid #1E1233;
+  display: inline-block;
+  margin-left: 4px;
+}
+
+/* Y2K Buttons */
+.retro-btn {
+  background-color: var(--color-electric-yellow);
+  color: #1E1233;
+  border: 3px solid #1E1233;
+  box-shadow: 4px 4px 0px #1E1233;
+  border-radius: 12px;
+  font-weight: 800;
+  padding: 10px 20px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.retro-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #1E1233;
+}
+
+.retro-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1E1233;
+}
+
+.retro-btn-pink {
+  background-color: var(--color-bubblegum-pink);
+  color: #ffffff;
+}
+
+.retro-btn-violet {
+  background-color: var(--color-pop-violet);
+  color: #ffffff;
+}
+
+.retro-btn-lime {
+  background-color: var(--color-acid-lime);
+  color: #1E1233;
+}
+
+/* Stickers & Badges */
+.retro-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 2px solid #1E1233;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  box-shadow: 2px 2px 0px #1E1233;
+}
+
+/* Background checkered / dot patterns */
+.y2k-grid-pattern {
+  background-image: 
+    radial-gradient(#8C65FF 12%, transparent 12%),
+    radial-gradient(#FF4FA3 12%, transparent 12%);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+  background-color: #FFF8F0;
+}
+
+/* Keyframe animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes pulse-pop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-pop {
+  animation: pulse-pop 2s ease-in-out infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
