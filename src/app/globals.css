@@ -147,3 +147,26 @@ body {
 .animate-sparkle {
   animation: sparkle 1.5s ease-in-out infinite;
 }
+
+/* Screen Shake and Glitch for Prank Reveal */
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10%, 50%, 90% { transform: translate(-8px, -6px) rotate(-1.5deg); }
+  20%, 60% { transform: translate(8px, 6px) rotate(1.5deg); }
+  30%, 70% { transform: translate(-6px, 4px) rotate(-1deg); }
+  40%, 80% { transform: translate(6px, -4px) rotate(1deg); }
+}
+
+.animate-screen-shake {
+  animation: screen-shake 0.25s infinite;
+}
+
+@keyframes laser-scan {
+  0% { top: 0%; opacity: 0.8; }
+  50% { top: 95%; opacity: 1; }
+  100% { top: 0%; opacity: 0.8; }
+}
+
+.animate-laser {
+  animation: laser-scan 2s ease-in-out infinite;
+}
