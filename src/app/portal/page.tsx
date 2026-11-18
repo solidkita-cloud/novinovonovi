@@ -92,17 +92,17 @@ export default function PortalPrankPage() {
   const triggerSuspensePrank = () => {
     if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
 
-    // STEP 1: SUDDEN CRASH & PITCH BLACK BLANK SCREEN FOR 6 SECONDS!
-    // (Bikin satu ruangan hening & panik: "Lho layarnya mati beneran?!")
+    // STEP 1: SUDDEN CRASH & PITCH BLACK BLANK SCREEN FOR 10 FULL SECONDS!
+    // (Bikin satu ruangan hening & panik: "Lho layarnya mati beneran?! Rusak apa ya?!")
     setPhase('crash-blank');
 
-    // STEP 2: At Second 5.5 -> Quick glitch/reboot warning
+    // STEP 2: At Second 10.0 -> Quick glitch/reboot warning (1.2 detik)
     const tShake = setTimeout(() => {
       setPhase('reboot-shake');
       playExplosionSound();
-    }, 5500);
+    }, 10000);
 
-    // STEP 3: At Second 6.8 -> KABOOOOM! CELEBRATION EXPLOSION!
+    // STEP 3: At Second 11.2 -> KABOOOOM! CELEBRATION EXPLOSION!
     const tReveal = setTimeout(() => {
       setPhase('revealed');
       startMusicBox();
@@ -130,7 +130,7 @@ export default function PortalPrankPage() {
           requestAnimationFrame(frame);
         }
       })();
-    }, 6800);
+    }, 11200);
 
     return () => {
       clearTimeout(tShake);

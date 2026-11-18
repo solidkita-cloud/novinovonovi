@@ -42,11 +42,11 @@ function UnlockContent() {
         // Continue anyway
       }
 
-      // Enter 5 seconds of panic suspense on phone too!
+      // Enter 10 seconds of panic suspense on phone too!
       setScanStep('panic-suspense');
     }, 2600);
 
-    // Stage 2: After 5.5 seconds of blank suspense on laptop, phone reveals the prank too!
+    // Stage 2: After 11.2 seconds of blank suspense on laptop, phone reveals the prank synchronously!
     const tVerdict = setTimeout(() => {
       setScanStep('verdict');
       confetti({
@@ -55,7 +55,7 @@ function UnlockContent() {
         origin: { y: 0.6 },
         colors: ['#FF4FA3', '#FFDA35', '#B7F45A', '#8C65FF'],
       });
-    }, 8500);
+    }, 13800);
 
     return () => {
       clearTimeout(t1);
