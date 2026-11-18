@@ -8,7 +8,7 @@ export const UNGU_PLAYLIST: UnguSong[] = [
     album: 'Melayang',
     year: '2005',
     lyricsHighlight: '"Aku yang tak pernah bisa lupakan dirinya yang kini hadir di antara kita..."',
-    youtubeId: 'j80Vq1_p36M',
+    youtubeId: 'y3pV7IVfQVw',
     spotifyTrackId: '4Hh1wYvjI3tYxX8l9D0VbS',
   },
   {
@@ -17,7 +17,7 @@ export const UNGU_PLAYLIST: UnguSong[] = [
     album: 'Melayang',
     year: '2005',
     lyricsHighlight: '"Menatap indahnya senyuman di wajahmu, membuat ku terdiam dan membisu..."',
-    youtubeId: 'q8y0JkC2X_w',
+    youtubeId: 'BURrhXkc97M',
     spotifyTrackId: '6bZ7B1Z4fT8E0k9jL3mXyQ',
   },
   {
@@ -26,7 +26,7 @@ export const UNGU_PLAYLIST: UnguSong[] = [
     album: 'Untukmu Selamanya',
     year: '2007',
     lyricsHighlight: '"Mungkin ini memang jalan takdirku, mengagumi tanpa dicintai..."',
-    youtubeId: 'eYq5Z3n3D3g',
+    youtubeId: 'NxITTclx7Go',
     spotifyTrackId: '1XyZ4Q1k9L8M7N6P5O4R3S',
   },
   {
@@ -35,7 +35,7 @@ export const UNGU_PLAYLIST: UnguSong[] = [
     album: 'Untukmu Selamanya',
     year: '2007',
     lyricsHighlight: '"Ku tahu ku takkan bisa membencimu, walau kau tlah menduakan hatiku..."',
-    youtubeId: 'a1b2c3d4e5f',
+    youtubeId: 'RGq3oRN4pgA',
     spotifyTrackId: '7A8B9C0D1E2F3G4H5I6J7K',
   },
   {
@@ -44,7 +44,7 @@ export const UNGU_PLAYLIST: UnguSong[] = [
     album: 'Para Pencari-Mu',
     year: '2007',
     lyricsHighlight: '"Izinkan ku ucap kata taubat sebelum nafas ini terhenti..."',
-    youtubeId: 'kL9mN8oP7qR',
+    youtubeId: 'o5nf8_N-ocA',
     spotifyTrackId: '3K4L5M6N7O8P9Q0R1S2T3U',
   },
 ];
