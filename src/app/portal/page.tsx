@@ -275,7 +275,7 @@ export default function PortalPrankPage() {
             </div>
             <p className="text-xs text-slate-300 font-sans leading-relaxed">
               Terdeteksi anomali pada sesi workstation internal. Sesuai dengan Kebijakan Tata Kelola Keamanan TI, sistem memerlukan otentikasi biometrik ganda untuk verifikasi hak akses pengguna:{' '}
-              <span className="text-yellow-400 font-black underline tracking-wide">BUNDA NOVI</span>.
+              <span className="text-yellow-400 font-black underline tracking-wide">NOVI</span>.
             </p>
             <p className="text-[11px] text-slate-400 font-sans leading-relaxed border-t border-red-900/50 pt-1.5">
               Harap segera selesaikan pemindaian verifikasi identitas sebelum batas waktu berakhir guna mencegah isolasi data dan penguncian akun secara otomatis oleh sistem keamanan pusat.
