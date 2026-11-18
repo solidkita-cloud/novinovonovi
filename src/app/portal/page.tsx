@@ -270,13 +270,15 @@ export default function PortalPrankPage() {
           {/* Urgent Threat Warning */}
           <div className="p-4 bg-red-950/70 border-2 border-red-600/70 rounded-xl text-left space-y-2">
             <div className="flex items-center gap-2 text-red-400 font-mono font-black text-xs tracking-wider">
-              <AlertTriangle className="w-4 h-4 text-red-500 animate-bounce" />
-              <span>PERINGATAN RESMI: DATA KANTOR DIKUNCI SEMENTARA</span>
+              <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />
+              <span>PERINGATAN RESMI: PROTOKOL KEAMANAN DATA AKTIF</span>
             </div>
             <p className="text-xs text-slate-300 font-sans leading-relaxed">
-              Sesi kerja membutuhkan otentikasi biometrik ganda untuk Operator Target:{' '}
-              <span className="text-yellow-400 font-black underline">BUNDA NOVI</span>.
-              Jika pemindaian tidak diselesaikan sebelum batas waktu, seluruh jatah cuti, file Excel keuangan, dan jatah camilan kantor akan otomatis dipindahkan ke divisi IT!
+              Terdeteksi anomali pada sesi workstation internal. Sesuai dengan Kebijakan Tata Kelola Keamanan TI, sistem memerlukan otentikasi biometrik ganda untuk verifikasi hak akses pengguna:{' '}
+              <span className="text-yellow-400 font-black underline tracking-wide">BUNDA NOVI</span>.
+            </p>
+            <p className="text-[11px] text-slate-400 font-sans leading-relaxed border-t border-red-900/50 pt-1.5">
+              Harap segera selesaikan pemindaian verifikasi identitas sebelum batas waktu berakhir guna mencegah isolasi data dan penguncian akun secara otomatis oleh sistem keamanan pusat.
             </p>
           </div>
 
@@ -300,13 +302,13 @@ export default function PortalPrankPage() {
           {/* TIMER RAKSASA (Bikin Panik!) */}
           <div className="bg-[#1E122A] p-4 rounded-xl border-2 border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.2)] space-y-1">
             <p className="text-[11px] font-mono font-bold text-red-400 uppercase tracking-widest">
-              SISA WAKTU SEBELUM DATA TERENKRIPSI PERMANEN:
+              SISA WAKTU SEBELUM SISTEM DIKUNCI PERMANEN:
             </p>
             <div className="text-4xl sm:text-6xl font-mono font-black text-red-500 tracking-widest drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] animate-pulse">
               {formatCountdown(countdown)}
             </div>
-            <p className="text-xs text-yellow-300 font-mono font-bold pt-1">
-              Arahkan kamera HP Bunda Novi ke QR Code di atas sekarang 📱
+            <p className="text-xs text-slate-300 font-mono pt-1">
+              Pindai QR Code di atas menggunakan kamera ponsel untuk verifikasi identitas (2FA)
             </p>
           </div>
 

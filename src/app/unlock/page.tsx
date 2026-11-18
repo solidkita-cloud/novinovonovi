@@ -19,17 +19,17 @@ function UnlockContent() {
     // Stage 1: Progress simulation (2.5 seconds of high-tech face scan)
     const t1 = setTimeout(() => {
       setProgress(50);
-      setStatusText('Memindai kontur wajah dan ekspresi senyum Bunda Novi...');
+      setStatusText('Memverifikasi geometri wajah dan parameter biometrik...');
     }, 800);
 
     const t2 = setTimeout(() => {
       setProgress(85);
-      setStatusText('Mengecek database karyawan: Mencocokkan senyuman manis...');
+      setStatusText('Sinkronisasi data identitas dengan Server Keamanan Internal...');
     }, 1700);
 
     const t3 = setTimeout(async () => {
       setProgress(100);
-      setStatusText('Pemindaian 100% Selesai! Mengirim kunci ke laptop...');
+      setStatusText('Otentikasi 100% Selesai! Mengirim otorisasi ke terminal laptop...');
 
       // Send unlock signal to trigger the laptop screen blank crash!
       try {
@@ -102,7 +102,7 @@ function UnlockContent() {
             {/* Instruction and Progress Bar */}
             <div className="space-y-2">
               <h2 className="text-sm font-black text-slate-100 font-mono tracking-wide uppercase">
-                Dekatkan Wajah Bunda ke Layar
+                Posisikan Wajah Pada Area Sensor
               </h2>
               <p className="text-xs text-slate-400 font-sans min-h-[32px] leading-relaxed">
                 {statusText}
@@ -127,11 +127,11 @@ function UnlockContent() {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-lg font-black text-red-500 font-mono">
-                LHO? KONEKSI TERMINAL MATI...
+              <h2 className="text-base sm:text-lg font-black text-red-500 font-mono">
+                PERINGATAN: KONEKSI WORKSTATION TERPUTUS
               </h2>
               <p className="text-xs text-slate-300 font-mono leading-relaxed">
-                Terminal laptop mendadak tidak merespons... Menghubungkan ulang dalam beberapa detik...
+                Terjadi kegagalan komunikasi dengan host terminal (ERR_CONNECTION_TIMED_OUT). Mencoba memulihkan sesi...
               </p>
             </div>
 
