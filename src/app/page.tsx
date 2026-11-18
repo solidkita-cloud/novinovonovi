@@ -1,7 +1,7 @@
 // src/app/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BootScreen } from '@/components/boot/BootScreen';
 import { BirthdayHero } from '@/components/hero/BirthdayHero';
 import { BirthdayMessage } from '@/components/birthday-message/BirthdayMessage';
@@ -10,22 +10,49 @@ import { SurpriseCorner } from '@/components/surprises/SurpriseCorner';
 import { UnguMusicPlayer } from '@/components/music-player/UnguMusicPlayer';
 import { WishSection } from '@/components/wishes/WishSection';
 import { EmotionalFinale } from '@/components/finale/EmotionalFinale';
-import { Sparkles, Heart, Disc, MessageSquareHeart } from 'lucide-react';
+import { startMusicBox, toggleMusicBox, subscribeMusicBox } from '@/lib/musicBox';
+import { Music, Pause, Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function BirthdayPage() {
   const [bootCompleted, setBootCompleted] = useState(false);
+  const [musicPlaying, setMusicPlaying] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribeMusicBox((playing) => {
+      setMusicPlaying(playing);
+    });
+    return () => unsub();
+  }, []);
 
   const handleEnterParty = () => {
     setBootCompleted(true);
+    // AUTOPLAY: Start gentle music box chime immediately on entering!
+    startMusicBox();
+
     // Welcome celebratory confetti shower
     confetti({
-      particleCount: 100,
+      particleCount: 110,
       spread: 90,
       origin: { y: 0.5 },
       colors: ['#FF4FA3', '#FFDA35', '#B7F45A', '#8C65FF', '#FFFFFF'],
     });
   };
+
+  // User interaction fallback: start music on first screen touch/click if not yet playing
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (bootCompleted) {
+        startMusicBox();
+      }
+    };
+    window.addEventListener('click', unlockAudio, { once: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true });
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+  }, [bootCompleted]);
 
   return (
     <main className="min-h-screen bg-[#FFF4E8] text-[#1E1233] relative overflow-hidden">
@@ -53,8 +80,25 @@ export default function BirthdayPage() {
             </span>
           </div>
 
-          {/* Quick Nav Anchors */}
+          {/* Quick Nav Anchors + Music Toggle */}
           <nav className="flex items-center gap-1.5 sm:gap-2 text-[11px] font-mono font-bold">
+            {/* Quick Mini Music Controller in Navbar */}
+            <button
+              onClick={() => toggleMusicBox()}
+              className={`px-2.5 py-1 rounded-lg border-2 border-[#1E1233] flex items-center gap-1.5 transition-all cursor-pointer shadow-[2px_2px_0px_#1E1233] ${
+                musicPlaying
+                  ? 'bg-[#B7F45A] text-[#1E1233]'
+                  : 'bg-[#FFE4EE] text-[#1E1233] hover:bg-[#FFD1E3]'
+              }`}
+              title="Putar / Jeda Musik Kotak Musik"
+            >
+              <Music className={`w-3.5 h-3.5 ${musicPlaying ? 'animate-bounce' : ''}`} />
+              <span className="hidden sm:inline">
+                {musicPlaying ? 'Musik: Menyala 🎵' : 'Musik: Jeda'}
+              </span>
+              {musicPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3 fill-current" />}
+            </button>
+
             <a
               href="#birthday-message"
               className="px-2.5 py-1 rounded-lg bg-[#FFE4EE] hover:bg-[#FFD1E3] text-[#1E1233] border border-[#1E1233] transition-colors hidden sm:inline-block"

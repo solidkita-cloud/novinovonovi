@@ -1,183 +1,85 @@
 // src/components/music-player/UnguMusicPlayer.tsx
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UNGU_PLAYLIST } from '@/data/playlist';
 import { Floppy } from '@/characters/Floppy';
-import { Play, Pause, SkipForward, SkipBack, Music, Volume2, VolumeX, Sparkles, Radio } from 'lucide-react';
-
-// Web Audio API Synthesizer Notes for Birthday Music Box
-const NOTES: Record<string, number> = {
-  G4: 392.00,
-  A4: 440.00,
-  B4: 493.88,
-  C5: 523.25,
-  D5: 587.33,
-  E5: 659.25,
-  F5: 698.46,
-  G5: 783.99,
-  REST: 0,
-};
-
-const BDAY_MELODY: [string, number][] = [
-  // Happy birthday to you
-  ['G4', 0.75], ['G4', 0.25], ['A4', 1.0], ['G4', 1.0], ['C5', 1.0], ['B4', 2.0],
-  // Happy birthday to you
-  ['G4', 0.75], ['G4', 0.25], ['A4', 1.0], ['G4', 1.0], ['D5', 1.0], ['C5', 2.0],
-  // Happy birthday dear Bunda Novi
-  ['G4', 0.75], ['G4', 0.25], ['G5', 1.0], ['E5', 1.0], ['C5', 1.0], ['B4', 1.0], ['A4', 1.5],
-  // Happy birthday to you
-  ['F5', 0.75], ['F5', 0.25], ['E5', 1.0], ['C5', 1.0], ['D5', 1.0], ['C5', 2.5],
-  ['REST', 1.5],
-];
+import {
+  startMusicBox,
+  stopMusicBox,
+  toggleMusicBox,
+  isMusicBoxActive,
+  setMusicBoxMuted,
+  isMusicBoxMuted,
+  subscribeMusicBox,
+} from '@/lib/musicBox';
+import { Play, Pause, SkipForward, SkipBack, Music, Volume2, VolumeX, Radio } from 'lucide-react';
 
 export const UnguMusicPlayer: React.FC = () => {
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [playbackMode, setPlaybackMode] = useState<'synth' | 'youtube'>('synth');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const synthTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const melodyIndexRef = useRef(0);
-  const isPlayingRef = useRef(false);
+  const [synthPlaying, setSynthPlaying] = useState(false);
+  const [ytPlaying, setYtPlaying] = useState(false);
+  const [isMuted, setIsMutedState] = useState(false);
 
   const currentSong = UNGU_PLAYLIST[currentSongIndex];
 
-  // Initialize or resume AudioContext
-  const getAudioContext = () => {
-    if (!audioCtxRef.current) {
-      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtxClass) {
-        audioCtxRef.current = new AudioCtxClass();
-      }
-    }
-    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
-      audioCtxRef.current.resume();
-    }
-    return audioCtxRef.current;
-  };
-
-  // Play a single bell/chime tine
-  const playChimeNote = (freq: number, startTime: number, duration: number) => {
-    const ctx = audioCtxRef.current;
-    if (!ctx || freq <= 0 || isMuted) return;
-
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(freq, startTime);
-
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(freq * 2.76, startTime); // Inharmonic chime overtone
-
-    const volume = 0.25;
-    gain1.gain.setValueAtTime(volume, startTime);
-    gain1.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-    gain2.gain.setValueAtTime(volume * 0.4, startTime);
-    gain2.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.7);
-
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-
-    osc1.start(startTime);
-    osc1.stop(startTime + duration);
-    osc2.start(startTime);
-    osc2.stop(startTime + duration * 0.7);
-  };
-
-  // Melody loop scheduler
-  const scheduleLoop = () => {
-    if (!isPlayingRef.current) return;
-    const ctx = getAudioContext();
-    if (!ctx) return;
-
-    const [noteName, durMult] = BDAY_MELODY[melodyIndexRef.current];
-    const freq = NOTES[noteName] || 0;
-    const tempoBeat = 0.45; // seconds per beat
-    const noteDuration = durMult * tempoBeat;
-
-    if (freq > 0) {
-      playChimeNote(freq, ctx.currentTime, noteDuration * 1.2);
-    }
-
-    melodyIndexRef.current = (melodyIndexRef.current + 1) % BDAY_MELODY.length;
-    synthTimerRef.current = setTimeout(() => {
-      scheduleLoop();
-    }, noteDuration * 1000);
-  };
-
-  const startSynth = () => {
-    getAudioContext();
-    isPlayingRef.current = true;
-    setIsPlaying(true);
-    scheduleLoop();
-  };
-
-  const stopSynth = () => {
-    isPlayingRef.current = false;
-    setIsPlaying(false);
-    if (synthTimerRef.current) {
-      clearTimeout(synthTimerRef.current);
-      synthTimerRef.current = null;
-    }
-  };
-
-  // Cleanup on unmount
+  // Subscribe to global Music Box state
   useEffect(() => {
-    return () => {
-      isPlayingRef.current = false;
-      if (synthTimerRef.current) clearTimeout(synthTimerRef.current);
-      if (audioCtxRef.current) audioCtxRef.current.close().catch(() => {});
-    };
+    const unsubscribe = subscribeMusicBox((playing) => {
+      setSynthPlaying(playing);
+    });
+    setIsMutedState(isMusicBoxMuted());
+    return () => unsubscribe();
   }, []);
 
-  // Main Play / Pause button handler
+  const isPlaying = playbackMode === 'synth' ? synthPlaying : ytPlaying;
+
   const handleTogglePlay = () => {
     if (playbackMode === 'synth') {
-      if (isPlaying) {
-        stopSynth();
-      } else {
-        startSynth();
-      }
+      toggleMusicBox();
     } else {
-      setIsPlaying(!isPlaying);
+      setYtPlaying(!ytPlaying);
     }
   };
 
   const handleNext = () => {
     setCurrentSongIndex((prev) => (prev + 1) % UNGU_PLAYLIST.length);
-    if (playbackMode === 'synth' && !isPlaying) {
-      startSynth();
+    if (playbackMode === 'synth' && !synthPlaying) {
+      startMusicBox();
     } else if (playbackMode === 'youtube') {
-      setIsPlaying(true);
+      setYtPlaying(true);
     }
   };
 
   const handlePrev = () => {
     setCurrentSongIndex((prev) => (prev - 1 + UNGU_PLAYLIST.length) % UNGU_PLAYLIST.length);
-    if (playbackMode === 'synth' && !isPlaying) {
-      startSynth();
+    if (playbackMode === 'synth' && !synthPlaying) {
+      startMusicBox();
     } else if (playbackMode === 'youtube') {
-      setIsPlaying(true);
+      setYtPlaying(true);
     }
   };
 
   const switchMode = (mode: 'synth' | 'youtube') => {
-    if (playbackMode === 'synth' && isPlaying) {
-      stopSynth();
+    if (mode === 'youtube') {
+      stopMusicBox();
+      setYtPlaying(true);
+    } else {
+      setYtPlaying(false);
+      startMusicBox();
     }
     setPlaybackMode(mode);
-    setIsPlaying(mode === 'youtube');
+  };
+
+  const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMutedState(nextMuted);
+    setMusicBoxMuted(nextMuted);
   };
 
   return (
-    <section className="py-12 px-4 max-w-4xl mx-auto">
+    <section id="ungu-music-player" className="py-12 px-4 max-w-4xl mx-auto">
       {/* Player Window */}
       <div className="retro-window bg-[#1E1233] border-4 border-[#8C65FF] shadow-[8px_8px_0px_#FFDA35]">
         {/* Header Bar */}
@@ -210,7 +112,7 @@ export const UnguMusicPlayer: React.FC = () => {
                     : 'bg-[#2D1B4E] text-gray-300 hover:bg-[#3D256A]'
                 }`}
               >
-                🔔 Kotak Musik Chime (Langsung Bunyi)
+                🔔 Kotak Musik Chime (Autoplay Aktif)
               </button>
               <button
                 onClick={() => switchMode('youtube')}
@@ -233,7 +135,7 @@ export const UnguMusicPlayer: React.FC = () => {
                 className={`w-28 h-28 rounded-full border-4 border-[#1E1233] bg-[#110822] flex items-center justify-center shadow-lg mb-2 ${
                   isPlaying ? 'animate-spin' : ''
                 }`}
-                style={{ animationDuration: '4s' }}
+                style={{ animationDuration: '3.5s' }}
               >
                 <div className="w-10 h-10 rounded-full bg-[#FF4FA3] border-2 border-white flex items-center justify-center">
                   <div className="w-3 h-3 rounded-full bg-[#1E1233]" />
@@ -253,8 +155,8 @@ export const UnguMusicPlayer: React.FC = () => {
                 <div className="bg-[#0D2818] border-3 border-[#B7F45A] rounded-xl p-4 font-mono text-[#B7F45A] shadow-inner space-y-2">
                   <div className="flex items-center justify-between text-[10px] tracking-wider border-b border-[#B7F45A]/30 pb-1.5">
                     <span className="flex items-center gap-1.5">
-                      <span className={`w-2.5 h-2.5 rounded-full ${isPlaying ? 'bg-[#B7F45A] animate-ping' : 'bg-gray-600'}`} />
-                      {isPlaying ? 'NOW PLAYING: MUSIC BOX CHIME ✨' : 'AUDIO READY • CLICK PLAY TO START'}
+                      <span className={`w-2.5 h-2.5 rounded-full ${synthPlaying ? 'bg-[#B7F45A] animate-ping' : 'bg-gray-600'}`} />
+                      {synthPlaying ? 'NOW PLAYING: MUSIC BOX CHIME ✨' : 'AUDIO PAUSED • CLICK PLAY TO RESUME'}
                     </span>
                     <span>44.1kHz • WEB AUDIO</span>
                   </div>
@@ -274,10 +176,10 @@ export const UnguMusicPlayer: React.FC = () => {
                       <div
                         key={i}
                         className={`flex-1 rounded-t transition-all ${
-                          isPlaying ? 'bg-[#B7F45A]' : 'bg-gray-700'
+                          synthPlaying ? 'bg-[#B7F45A]' : 'bg-gray-700'
                         }`}
                         style={{
-                          height: isPlaying ? `${(h * ((i % 3) + 1)) % 100}%` : '20%',
+                          height: synthPlaying ? `${(h * ((i % 3) + 1)) % 100}%` : '20%',
                           transitionDuration: '0.2s',
                         }}
                       />
@@ -300,7 +202,7 @@ export const UnguMusicPlayer: React.FC = () => {
                     <iframe
                       width="100%"
                       height="100%"
-                      src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=${isPlaying ? 1 : 0}&enablejsapi=1&origin=https://novinovonovi.vercel.app`}
+                      src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=${ytPlaying ? 1 : 0}&enablejsapi=1&origin=https://novinovonovi.vercel.app`}
                       title={`Ungu - ${currentSong.title}`}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -323,7 +225,7 @@ export const UnguMusicPlayer: React.FC = () => {
 
                   <button
                     onClick={handleTogglePlay}
-                    className="px-7 py-3 rounded-xl bg-[#FFDA35] hover:bg-[#FFE055] text-[#1E1233] border-3 border-[#1E1233] font-black text-sm sm:text-base flex items-center gap-2 cursor-pointer active:scale-95 transition-all shadow-[4px_4px_0px_#B7F45A] animate-pulse-pop"
+                    className="px-7 py-3 rounded-xl bg-[#FFDA35] hover:bg-[#FFE055] text-[#1E1233] border-3 border-[#1E1233] font-black text-sm sm:text-base flex items-center gap-2 cursor-pointer active:scale-95 transition-all shadow-[4px_4px_0px_#B7F45A]"
                   >
                     {isPlaying ? (
                       <>
@@ -333,7 +235,7 @@ export const UnguMusicPlayer: React.FC = () => {
                     ) : (
                       <>
                         <Play className="w-5 h-5 fill-current text-[#1E1233]" />
-                        <span>PUTAR MUSIK SEKARANG! 🎵</span>
+                        <span>PUTAR MUSIK 🎵</span>
                       </>
                     )}
                   </button>
@@ -350,9 +252,9 @@ export const UnguMusicPlayer: React.FC = () => {
                 {/* Mute Toggle */}
                 {playbackMode === 'synth' && (
                   <button
-                    onClick={() => setIsMuted(!isMuted)}
+                    onClick={handleToggleMute}
                     className="p-3 rounded-xl bg-[#2D1B4E] hover:bg-[#3D256A] text-white border-2 border-[#8C65FF] cursor-pointer active:scale-95 transition-all shadow-[2px_2px_0px_#8C65FF]"
-                    title={isMuted ? 'Unmute' : 'Mute'}
+                    title={isMuted ? 'Buka Suara (Unmute)' : 'Matikan Suara (Mute)'}
                   >
                     {isMuted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5 text-[#B7F45A]" />}
                   </button>
@@ -372,10 +274,10 @@ export const UnguMusicPlayer: React.FC = () => {
                   key={song.id}
                   onClick={() => {
                     setCurrentSongIndex(idx);
-                    if (playbackMode === 'synth' && !isPlaying) {
-                      startSynth();
+                    if (playbackMode === 'synth' && !synthPlaying) {
+                      startMusicBox();
                     } else if (playbackMode === 'youtube') {
-                      setIsPlaying(true);
+                      setYtPlaying(true);
                     }
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer ${
