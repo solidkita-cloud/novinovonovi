@@ -3,23 +3,22 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ScanFace, CheckCircle2, PartyPopper, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { ScanFace, CheckCircle2, PartyPopper, ArrowRight, AlertTriangle } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { Floppy } from '@/characters/Floppy';
 
 function UnlockContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sid = searchParams.get('sid') || 'demo';
 
-  const [scanStep, setScanStep] = useState<'scanning' | 'verdict' | 'error'>('scanning');
+  const [scanStep, setScanStep] = useState<'scanning' | 'panic-suspense' | 'verdict'>('scanning');
   const [progress, setProgress] = useState(15);
   const [statusText, setStatusText] = useState('Menginisialisasi sensor biometrik wajah...');
 
   useEffect(() => {
     // Stage 1: Progress simulation (2.5 seconds of high-tech face scan)
     const t1 = setTimeout(() => {
-      setProgress(45);
+      setProgress(50);
       setStatusText('Memindai kontur wajah dan ekspresi senyum Bunda Novi...');
     }, 800);
 
@@ -30,9 +29,9 @@ function UnlockContent() {
 
     const t3 = setTimeout(async () => {
       setProgress(100);
-      setStatusText('Pemindaian 100% Selesai! Menganalisis hasil...');
+      setStatusText('Pemindaian 100% Selesai! Mengirim kunci ke laptop...');
 
-      // Send unlock signal to trigger the laptop screen explosion!
+      // Send unlock signal to trigger the laptop screen blank crash!
       try {
         await fetch('/api/unlock', {
           method: 'POST',
@@ -43,6 +42,12 @@ function UnlockContent() {
         // Continue anyway
       }
 
+      // Enter 5 seconds of panic suspense on phone too!
+      setScanStep('panic-suspense');
+    }, 2600);
+
+    // Stage 2: After 5.5 seconds of blank suspense on laptop, phone reveals the prank too!
+    const tVerdict = setTimeout(() => {
       setScanStep('verdict');
       confetti({
         particleCount: 80,
@@ -50,17 +55,18 @@ function UnlockContent() {
         origin: { y: 0.6 },
         colors: ['#FF4FA3', '#FFDA35', '#B7F45A', '#8C65FF'],
       });
-    }, 2600);
+    }, 8500);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      clearTimeout(tVerdict);
     };
   }, [sid]);
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-white flex flex-col items-center justify-center p-5 text-center font-sans select-none relative overflow-hidden">
+    <div className="min-h-screen bg-[#060911] text-white flex flex-col items-center justify-center p-5 text-center font-sans select-none relative overflow-hidden">
       {/* Background Matrix Grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-15"
@@ -71,7 +77,8 @@ function UnlockContent() {
         }}
       />
 
-      <div className="relative max-w-sm w-full bg-[#1E293B] border-3 border-slate-600 rounded-3xl p-6 shadow-2xl space-y-6">
+      <div className="relative max-w-sm w-full bg-[#0F172A] border-3 border-slate-700 rounded-3xl p-6 shadow-2xl space-y-6">
+        {/* STEP 1: FACE SCANNING */}
         {scanStep === 'scanning' && (
           <div className="space-y-6 py-4 animate-in fade-in duration-300">
             {/* Top Security Header */}
@@ -112,6 +119,27 @@ function UnlockContent() {
           </div>
         )}
 
+        {/* STEP 2: SUSPENSE PANIC SCREEN (Matches laptop's 5-second blank!) */}
+        {scanStep === 'panic-suspense' && (
+          <div className="space-y-5 py-6 animate-in fade-in duration-300">
+            <div className="inline-flex p-3 rounded-full bg-red-950/80 border-2 border-red-500 text-red-400 animate-bounce">
+              <AlertTriangle className="w-10 h-10" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-lg font-black text-red-500 font-mono">
+                LHO? KONEKSI TERMINAL MATI...
+              </h2>
+              <p className="text-xs text-slate-300 font-mono leading-relaxed">
+                Terminal laptop mendadak tidak merespons... Menghubungkan ulang dalam beberapa detik...
+              </p>
+            </div>
+
+            <div className="inline-block animate-spin text-2xl">⏳</div>
+          </div>
+        )}
+
+        {/* STEP 3: THE COMEDY VERDICT */}
         {scanStep === 'verdict' && (
           <div className="space-y-5 animate-in zoom-in-95 duration-400 text-center">
             {/* Success Shield */}
@@ -171,7 +199,7 @@ export default function UnlockPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#0F172A] text-white flex items-center justify-center font-mono text-sm">
+        <div className="min-h-screen bg-[#060911] text-white flex items-center justify-center font-mono text-sm">
           Menyiapkan Sensor Biometrik...
         </div>
       }

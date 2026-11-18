@@ -4,31 +4,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { useRouter } from 'next/navigation';
-import { ShieldAlert, Lock, Maximize2, PartyPopper, AlertTriangle, Terminal } from 'lucide-react';
+import { ShieldAlert, Maximize2, PartyPopper, AlertTriangle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Floppy } from '@/characters/Floppy';
 import { BundaNovi } from '@/characters/BundaNovi';
 import { startMusicBox } from '@/lib/musicBox';
 
-type PortalPhase = 'waiting' | 'shaking' | 'revealed';
+type PortalPhase = 'waiting' | 'crash-blank' | 'reboot-shake' | 'revealed';
 
 export default function PortalPrankPage() {
   const router = useRouter();
   const [sessionId, setSessionId] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [phase, setPhase] = useState<PortalPhase>('waiting');
-  const [countdown, setCountdown] = useState(120); // 2 minutes urgent countdown
-  const [glitchText, setGlitchText] = useState('>> MEMINDAI WAJAH BUNDA NOVI...');
+  const [countdown, setCountdown] = useState(120); // 2 minutes countdown
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize session and QR code
   useEffect(() => {
-    const sid = `novi-prank-${Math.floor(1000 + Math.random() * 9000)}`;
+    // Hidden random identifier without the word "prank"
+    const sid = `auth-${Math.floor(100000 + Math.random() * 900000)}`;
     setSessionId(sid);
 
     const unlockUrl = `https://novinovonovi.vercel.app/unlock?sid=${sid}`;
     QRCode.toDataURL(unlockUrl, {
-      width: 270,
+      width: 280,
       margin: 1.5,
       color: {
         dark: '#0F172A',
@@ -54,7 +54,7 @@ export default function PortalPrankPage() {
         const res = await fetch(`/api/unlock?sid=${sessionId}`);
         const data = await res.json();
         if (data.success && data.unlocked) {
-          triggerDramaticReveal();
+          triggerSuspensePrank();
         }
       } catch (err) {
         // silent error
@@ -66,8 +66,8 @@ export default function PortalPrankPage() {
     };
   }, [sessionId, phase]);
 
-  // Audio Synthesizer Beep for drama
-  const playAlertBuzzer = () => {
+  // Audio Synthesizer Beep for celebration explosion
+  const playExplosionSound = () => {
     try {
       const AudioCtxClass =
         window.AudioContext ||
@@ -76,60 +76,53 @@ export default function PortalPrankPage() {
         const ctx = new AudioCtxClass();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(320, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.5);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.6);
       }
     } catch (e) {}
   };
 
-  const triggerDramaticReveal = () => {
+  const triggerSuspensePrank = () => {
     if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
 
-    // Phase 1: DRAMATIC SCREEN SHAKE & GLITCH (2.2 seconds)
-    setPhase('shaking');
-    playAlertBuzzer();
+    // STEP 1: SUDDEN CRASH & PITCH BLACK BLANK SCREEN FOR 6 SECONDS!
+    // (Bikin satu ruangan hening & panik: "Lho layarnya mati beneran?!")
+    setPhase('crash-blank');
 
-    const g1 = setTimeout(() => {
-      setGlitchText('>> WAJAH BUNDA NOVI TERDETEKSI 100%!');
-      playAlertBuzzer();
-    }, 600);
+    // STEP 2: At Second 5.5 -> Quick glitch/reboot warning
+    const tShake = setTimeout(() => {
+      setPhase('reboot-shake');
+      playExplosionSound();
+    }, 5500);
 
-    const g2 = setTimeout(() => {
-      setGlitchText('>> ERROR 999: KECANTIKAN & KERAMAHAN MELEBIHI KAPASITAS CPU SERVER!');
-    }, 1200);
-
-    const g3 = setTimeout(() => {
-      setGlitchText('>> SYSTEM OVERHEAT! MELEDAK DALAM 3... 2... 1...');
-    }, 1800);
-
-    // Phase 2: FULL CONFETTI EXPLOSION & REVEAL
-    const finalTimer = setTimeout(() => {
+    // STEP 3: At Second 6.8 -> KABOOOOM! CELEBRATION EXPLOSION!
+    const tReveal = setTimeout(() => {
       setPhase('revealed');
       startMusicBox();
 
-      // Massive celebration fireworks
-      const end = Date.now() + 5 * 1000;
+      // Massive continuous confetti storm from both sides
+      const end = Date.now() + 6 * 1000;
       const colors = ['#FF4FA3', '#FFDA35', '#B7F45A', '#8C65FF', '#FFFFFF'];
 
       (function frame() {
         confetti({
-          particleCount: 8,
+          particleCount: 9,
           angle: 60,
-          spread: 60,
+          spread: 65,
           origin: { x: 0 },
           colors,
         });
         confetti({
-          particleCount: 8,
+          particleCount: 9,
           angle: 120,
-          spread: 60,
+          spread: 65,
           origin: { x: 1 },
           colors,
         });
@@ -137,13 +130,11 @@ export default function PortalPrankPage() {
           requestAnimationFrame(frame);
         }
       })();
-    }, 2400);
+    }, 6800);
 
     return () => {
-      clearTimeout(g1);
-      clearTimeout(g2);
-      clearTimeout(g3);
-      clearTimeout(finalTimer);
+      clearTimeout(tShake);
+      clearTimeout(tReveal);
     };
   };
 
@@ -162,13 +153,44 @@ export default function PortalPrankPage() {
   };
 
   return (
-    <div
-      className={`min-h-screen bg-[#090D16] text-white flex flex-col justify-between font-sans selection:bg-red-500 selection:text-white relative overflow-hidden ${
-        phase === 'shaking' ? 'animate-screen-shake bg-red-950/70' : ''
-      }`}
-    >
+    <div className="min-h-screen bg-[#060911] text-white flex flex-col justify-between font-sans selection:bg-red-500 selection:text-white relative overflow-hidden select-none">
       {/* ======================================================== */}
-      {/* PHASE 3: THE ULTIMATE REVEAL OVERLAY                     */}
+      {/* FASE 2: PITCH BLACK BLANK CRASH (5 - 6 DETIK MENEGANGKAN) */}
+      {/* ======================================================== */}
+      {phase === 'crash-blank' && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col justify-between p-8 font-mono text-xs text-neutral-600 animate-in fade-in duration-200 cursor-none">
+          <div className="space-y-1">
+            <p className="text-neutral-500">SYSTEM FAILURE: IRQ_NOT_LESS_OR_EQUAL (0x0000000A)</p>
+            <p>Dumping physical memory to disk: 100% completed.</p>
+            <p>Terminating active display session...</p>
+          </div>
+          {/* Pitch black center - looks like the monitor literally died */}
+          <div className="flex-1 flex items-center justify-center">
+            <span className="w-2.5 h-4 bg-neutral-700 animate-pulse" />
+          </div>
+          <p className="text-[10px] text-neutral-700 text-center">
+            Signal lost. Attempting hardware reboot...
+          </p>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* FASE 3: GLITCH & REBOOT (1 DETIK SEBELUM MELEDAK)         */}
+      {/* ======================================================== */}
+      {phase === 'reboot-shake' && (
+        <div className="fixed inset-0 z-50 bg-red-950/90 flex flex-col items-center justify-center p-6 text-center font-mono animate-screen-shake">
+          <div className="text-yellow-400 text-7xl animate-ping mb-4">⚠️</div>
+          <h2 className="text-3xl sm:text-5xl font-black text-red-500 tracking-widest mb-2">
+            OVERRIDING SYSTEM LOCK!
+          </h2>
+          <p className="text-yellow-300 text-lg font-bold">
+            DETONATING SURPRISE IN 3... 2... 1...
+          </p>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* FASE 4: THE ULTIMATE "PANIK GAK BUNDA?!" REVEAL          */}
       {/* ======================================================== */}
       {phase === 'revealed' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-[#1E1233] via-[#4C1D95] to-[#150B24] animate-in zoom-in-95 duration-500 overflow-y-auto">
@@ -188,7 +210,7 @@ export default function PortalPrankPage() {
               </p>
               <div className="max-w-xl mx-auto p-4 bg-[#FFF8E7] rounded-2xl border-2 border-[#FFDA35] shadow-sm">
                 <p className="text-sm sm:text-base font-extrabold text-[#5B21B6] leading-relaxed">
-                  “Tenang Bundaaa, server dan data kantor aman sentosa! Tidak ada file yang hilang! Yang ada hari ini cuma kue, tawa, dan cinta dari seluruh rekan kantor!”
+                  “Tenang Bundaaa, laptop & data kantor aman sentosa! Tidak ada file yang hilang! Yang ada hari ini cuma kue, tumpeng, tawa, dan cinta dari seluruh rekan kantor!”
                 </p>
               </div>
             </div>
@@ -214,34 +236,13 @@ export default function PortalPrankPage() {
       )}
 
       {/* ======================================================== */}
-      {/* PHASE 2: DRAMATIC GLITCH & SHAKE OVERLAY                 */}
-      {/* ======================================================== */}
-      {phase === 'shaking' && (
-        <div className="fixed inset-0 z-40 bg-black/85 flex flex-col items-center justify-center p-6 text-center space-y-6 font-mono">
-          <div className="text-red-500 text-6xl sm:text-8xl animate-ping select-none">
-            ⚠️
-          </div>
-          <div className="space-y-3 max-w-lg">
-            <h2 className="text-2xl sm:text-4xl font-black text-red-500 tracking-wider">
-              CRITICAL SYSTEM FAULT!
-            </h2>
-            <div className="bg-red-950/80 border-2 border-red-500 p-4 rounded-xl text-left text-xs sm:text-sm text-yellow-300 space-y-1">
-              <p>{glitchText}</p>
-              <p className="text-red-400">&gt;&gt; OVERRIDING PERMISSIONS...</p>
-              <p className="text-white font-bold">&gt;&gt; UNLOCKING CELEBRATION PROTOCOL...</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* PHASE 1: THE ENTERPRISE SECURITY PRANK SCREEN            */}
+      {/* FASE 1: TAMPILAN PRANK SERIUS DENGAN TIMER RAKSASA       */}
       {/* ======================================================== */}
       {/* Top Header */}
-      <header className="bg-[#111827] border-b-2 border-slate-800 px-6 py-3 flex items-center justify-between shadow-lg">
+      <header className="bg-[#0F172A] border-b-2 border-slate-800 px-6 py-3.5 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-red-600 rounded-lg text-white shadow-md">
-            <ShieldAlert className="w-5 h-5 animate-pulse" />
+          <div className="p-2 bg-red-600 rounded-lg text-white shadow-md animate-pulse">
+            <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
             <h1 className="font-mono font-black text-xs sm:text-sm tracking-wider text-slate-100 uppercase">
@@ -263,19 +264,19 @@ export default function PortalPrankPage() {
         </button>
       </header>
 
-      {/* Main Center Area with QR Code */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-8">
-        <div className="max-w-xl w-full bg-[#111827] border-2 border-slate-700 rounded-2xl p-6 sm:p-10 shadow-2xl text-center space-y-6">
+      {/* Main Center Area with QR Code & Giant Timer */}
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-xl w-full bg-[#0F172A] border-2 border-slate-700 rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
           {/* Urgent Threat Warning */}
           <div className="p-4 bg-red-950/70 border-2 border-red-600/70 rounded-xl text-left space-y-2">
             <div className="flex items-center gap-2 text-red-400 font-mono font-black text-xs tracking-wider">
               <AlertTriangle className="w-4 h-4 text-red-500 animate-bounce" />
-              <span>PERINGATAN: DATA KANTOR DIKUNCI SEMENTARA</span>
+              <span>PERINGATAN RESMI: DATA KANTOR DIKUNCI SEMENTARA</span>
             </div>
             <p className="text-xs text-slate-300 font-sans leading-relaxed">
               Sesi kerja membutuhkan otentikasi biometrik ganda untuk Operator Target:{' '}
               <span className="text-yellow-400 font-black underline">BUNDA NOVI</span>.
-              Jika pemindaian tidak dilakukan dalam waktu yang ditentukan, seluruh jatah cuti, file Excel keuangan, dan jatah camilan kantor akan otomatis dipindahkan ke divisi IT!
+              Jika pemindaian tidak diselesaikan sebelum batas waktu, seluruh jatah cuti, file Excel keuangan, dan jatah camilan kantor akan otomatis dipindahkan ke divisi IT!
             </p>
           </div>
 
@@ -285,10 +286,10 @@ export default function PortalPrankPage() {
               <img
                 src={qrDataUrl}
                 alt="Authentication QR Code"
-                className="w-60 h-60 sm:w-68 sm:h-68 object-contain rounded-lg"
+                className="w-56 h-56 sm:w-64 sm:h-64 object-contain rounded-lg"
               />
             ) : (
-              <div className="w-60 h-60 flex items-center justify-center font-mono text-xs text-slate-500">
+              <div className="w-56 h-56 flex items-center justify-center font-mono text-xs text-slate-500">
                 Membuat QR Code Otentikasi...
               </div>
             )}
@@ -296,24 +297,24 @@ export default function PortalPrankPage() {
             <div className="absolute inset-x-4 top-4 h-1 bg-red-600 shadow-[0_0_12px_#EF4444] animate-laser pointer-events-none" />
           </div>
 
-          {/* Sesi & Countdown Timer */}
-          <div className="space-y-1 font-mono text-xs text-slate-400">
-            <p>
-              ID SESI: <span className="text-amber-400 font-bold">{sessionId || 'MEMUAT...'}</span>
+          {/* TIMER RAKSASA (Bikin Panik!) */}
+          <div className="bg-[#1E122A] p-4 rounded-xl border-2 border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.2)] space-y-1">
+            <p className="text-[11px] font-mono font-bold text-red-400 uppercase tracking-widest">
+              SISA WAKTU SEBELUM DATA TERENKRIPSI PERMANEN:
             </p>
-            <p className="text-xs text-slate-300 font-bold">
-              Arahkan kamera ponsel Bunda Novi ke QR Code di atas 📱
-            </p>
-            <p className="text-xs text-red-400 font-black tracking-wider pt-1">
-              DATA TERANCAM TERHAPUS DALAM: {formatCountdown(countdown)} ⏳
+            <div className="text-4xl sm:text-6xl font-mono font-black text-red-500 tracking-widest drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] animate-pulse">
+              {formatCountdown(countdown)}
+            </div>
+            <p className="text-xs text-yellow-300 font-mono font-bold pt-1">
+              Arahkan kamera HP Bunda Novi ke QR Code di atas sekarang 📱
             </p>
           </div>
 
           {/* Secret Manual Trigger for testing without phone */}
-          <div className="pt-2 border-t border-slate-800">
+          <div className="pt-1 border-t border-slate-800">
             <button
-              onClick={triggerDramaticReveal}
-              className="text-[10px] font-mono text-slate-500 hover:text-slate-300 underline cursor-pointer"
+              onClick={triggerSuspensePrank}
+              className="text-[10px] font-mono text-slate-600 hover:text-slate-400 underline cursor-pointer"
             >
               [Klik di sini untuk uji coba efek ledakan langsung tanpa scan]
             </button>
@@ -322,7 +323,7 @@ export default function PortalPrankPage() {
       </main>
 
       {/* Footer Status */}
-      <footer className="bg-[#111827] border-t border-slate-800 px-6 py-2.5 flex items-center justify-between text-xs font-mono text-slate-500">
+      <footer className="bg-[#0F172A] border-t border-slate-800 px-6 py-2.5 flex items-center justify-between text-xs font-mono text-slate-500">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-slate-400">STATUS SENSOR: ACTIVE & LISTENING</span>
